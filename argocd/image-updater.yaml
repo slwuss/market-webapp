@@ -14,35 +14,35 @@ spec:
 
       images:
         - alias: adservice
-          imageName: ghcr.io/laxmikantagiri/microservices-demo/adservice
+          imageName: ghcr.io/slwuss/market-webapp/adservice
 
         - alias: cartservice
-          imageName: ghcr.io/laxmikantagiri/microservices-demo/cartservice
+          imageName: ghcr.io/slwuss/market-webapp/cartservice
 
         - alias: checkoutservice
-          imageName: ghcr.io/laxmikantagiri/microservices-demo/checkoutservice
+          imageName: ghcr.io/slwuss/market-webapp/checkoutservice
 
         - alias: currencyservice
-          imageName: ghcr.io/laxmikantagiri/microservices-demo/currencyservice
+          imageName: ghcr.io/slwuss/market-webapp/currencyservice
 
         - alias: emailservice
-          imageName: ghcr.io/laxmikantagiri/microservices-demo/emailservice
+          imageName: ghcr.io/slwuss/market-webapp/emailservice
 
         - alias: frontend
-          imageName: ghcr.io/laxmikantagiri/microservices-demo/frontend
+          imageName: ghcr.io/slwuss/market-webapp/frontend
 
         - alias: paymentservice
-          imageName: ghcr.io/laxmikantagiri/microservices-demo/paymentservice
+          imageName: ghcr.io/slwuss/market-webapp/paymentservice
 
         - alias: productcatalogservice
-          imageName: ghcr.io/laxmikantagiri/microservices-demo/productcatalogservice
+          imageName: ghcr.io/slwuss/market-webapp/productcatalogservice
 
         - alias: recommendationservice
-          imageName: ghcr.io/laxmikantagiri/microservices-demo/recommendationservice
+          imageName: ghcr.io/slwuss/market-webapp/recommendationservice
 
         - alias: shippingservice
-          imageName: ghcr.io/laxmikantagiri/microservices-demo/shippingservice
+          imageName: ghcr.io/slwuss/market-webapp/shippingservice
 
         - alias: loadgenerator
-          imageName: ghcr.io/laxmikantagiri/microservices-demo/loadgenerator
+          imageName: ghcr.io/slwuss/market-webapp/loadgenerator
 
