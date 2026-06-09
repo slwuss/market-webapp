@@ -57,3 +57,7 @@ jobs:
 
     with:
       service: ${{ matrix.service }}
+    permissions:
+      contents: read
+      packages: write
+      id-token: write      
