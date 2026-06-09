@@ -45,7 +45,7 @@ images:
   productcatalogservice:
     repository: ghcr.io/slwuss/market-webapp/productcatalogservice
     tag: v0.10.5
-  recommendatioservice:
+  recommendationservice:
     repository: ghcr.io/slwuss/market-webapp/recommendationservice
     tag: v0.10.5
   shippingservice:
