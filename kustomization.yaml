@@ -7,7 +7,7 @@ resources:
 
 helmCharts:
   - name: onlineboutique
-    repo: oci://ghcr.io/slwuss/onlineboutique
+    repo: oci://ghcr.io/slwuss
     version: 0.10.5
     releaseName: boutique-app
     namespace: boutique-app
