@@ -161,7 +161,6 @@ config:
     - name: ghcr
       api_url: https://ghcr.io
       prefix: ghcr.io
-      credentials: pullsecret:argocd/ghcr-secret
     # - name: Docker Hub
     #   api_url: https://registry-1.docker.io
     #   ping: yes
