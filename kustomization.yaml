@@ -6,7 +6,7 @@ resources:
   - microservices-extra-kube-manifests/target-grp.yaml
 
 helmCharts:
-  - name: market-webapp
+  - name: onlineboutique
     repo: oci://ghcr.io/slwuss
     version: 0.10.5
     releaseName: boutique-app
