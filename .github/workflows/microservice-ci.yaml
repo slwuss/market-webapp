@@ -60,11 +60,6 @@ jobs:
           exit-code: 0
           vuln-type: os,library
 
-      - name: Debug token permission
-        run: |
-          echo "Actor: ${{ github.actor }}"
-          echo "Repo: ${{ github.repository }}"
-
       # -------------------
       # Push image (only if scan passes)
       # -------------------

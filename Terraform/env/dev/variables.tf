@@ -73,7 +73,7 @@ variable "node_group_instance_types" {
 variable "node_group_min_size" {
   description = "Minimum number of EKS nodes."
   type        = number
-  default     = 2
+  default     = 3
 }
 
 variable "node_group_max_size" {
@@ -85,7 +85,7 @@ variable "node_group_max_size" {
 variable "node_group_desired_size" {
   description = "Desired number of EKS nodes."
   type        = number
-  default     = 2
+  default     = 3
 }
 
 variable "bastion_instance_type" {
