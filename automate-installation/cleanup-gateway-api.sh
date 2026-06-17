@@ -2,22 +2,23 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 usage() {
   cat <<'EOF'
-Usage: ./cleanup-gateway-api.sh [--yes]
+Usage: ./cleanup-gateway-api.sh [--yes] [--cluster <name>]
 
-Searches for Gateway API HTTPRoute and Gateway resources in the current kubectl context,
-shows them, and deletes them from the cluster.
+Searches for Gateway API HTTPRoute and Gateway resources in the current kubectl
+context, shows them, and deletes them. Optionally also deletes EBS volumes whose
+Name tag starts with the given cluster name.
 
 Options:
-  --yes    Skip the confirmation prompt and delete immediately.
+  --yes              Skip all confirmation prompts and delete immediately.
+  --cluster <name>   EKS cluster name used to find and delete associated EBS volumes.
   -h, --help
 EOF
 }
 
 AUTO_CONFIRM=false
+CLUSTER_NAME=""
 
 verify_cleanup() {
   local timeout_seconds=120
@@ -51,6 +52,15 @@ while [[ $# -gt 0 ]]; do
     --yes|-y)
       AUTO_CONFIRM=true
       shift
+      ;;
+    --cluster)
+      CLUSTER_NAME="${2:-}"
+      if [[ -z "$CLUSTER_NAME" ]]; then
+        echo "Error: --cluster requires a value." >&2
+        usage >&2
+        exit 1
+      fi
+      shift 2
       ;;
     -h|--help)
       usage
@@ -107,5 +117,65 @@ echo "Deleting Gateway resources..."
 kubectl delete gateway --all --all-namespaces --ignore-not-found=true
 
 verify_cleanup
+
+# ── EBS Volume cleanup ───────────────────────────────────────────────────────
+
+echo ""
+if [[ -z "$CLUSTER_NAME" ]]; then
+  if [[ "$AUTO_CONFIRM" == true ]]; then
+    echo "[warn] --yes passed but no --cluster name provided — skipping EBS cleanup."
+  else
+    read -rp "Enter your EKS cluster name to delete associated EBS volumes (leave blank to skip): " CLUSTER_NAME
+  fi
+fi
+
+if [[ -z "$CLUSTER_NAME" ]]; then
+  echo "Skipping EBS volume cleanup."
+else
+  if ! command -v aws >/dev/null 2>&1; then
+    echo "aws CLI is required for EBS cleanup but was not found in PATH." >&2
+    echo "Skipping EBS volume cleanup."
+  else
+    echo ""
+    echo "Searching for EBS volumes with name starting with '${CLUSTER_NAME}'..."
+
+    VOLUMES_RAW=$(aws ec2 describe-volumes \
+      --filters "Name=tag:Name,Values=${CLUSTER_NAME}*" \
+      --query 'Volumes[*].[VolumeId,State,Tags[?Key==`Name`].Value|[0],Size]' \
+      --output text 2>/dev/null || true)
+
+    if [[ -z "$VOLUMES_RAW" ]]; then
+      echo "No EBS volumes found with name starting with '${CLUSTER_NAME}'."
+    else
+      echo "Found EBS volumes:"
+      printf "%-25s %-12s %-45s %s\n" "ID" "State" "Name" "Size(GiB)"
+      printf "%-25s %-12s %-45s %s\n" "-------------------------" "------------" "---------------------------------------------" "---------"
+      while IFS=$'\t' read -r vol_id state name size; do
+        printf "%-25s %-12s %-45s %s\n" "$vol_id" "$state" "${name:-N/A}" "$size"
+      done <<< "$VOLUMES_RAW"
+
+      DO_DELETE=true
+      if [[ "$AUTO_CONFIRM" != true ]]; then
+        read -r -p "Delete all listed EBS volumes? [y/N] " EBS_CONFIRM
+        case "$EBS_CONFIRM" in
+          y|Y|yes|YES) ;;
+          *)
+            echo "Skipping EBS volume deletion."
+            DO_DELETE=false
+            ;;
+        esac
+      fi
+
+      if [[ "$DO_DELETE" == true ]]; then
+        while IFS=$'\t' read -r vol_id _state _name _size; do
+          echo "Deleting EBS volume ${vol_id}..."
+          aws ec2 delete-volume --volume-id "$vol_id" \
+            || echo "[warn] Could not delete ${vol_id} — it may still be in-use."
+        done <<< "$VOLUMES_RAW"
+        echo "EBS volume deletion complete."
+      fi
+    fi
+  fi
+fi
 
 echo "Cleanup completed."
